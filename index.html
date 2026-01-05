@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Byte_Forge --discord</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #ff7a18;
+  --bg: #070b10;
+  --panel: rgba(15,20,28,.88);
+  --fg: #e6edf3;
+  --muted: #9aa4af;
+  --border: rgba(255,255,255,.06);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Source Code Pro", monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* glow */
+.glow {
+  position: fixed;
+  inset: -10%;
+  pointer-events: none;
+  z-index: 1;
+
+  background:
+    radial-gradient(
+      500px 500px at var(--gx, 50%) var(--gy, 50%),
+      rgba(255,140,40,0.85),
+      rgba(255,90,20,0.45),
+      rgba(255,60,0,0.25),
+      transparent 70%
+    ),
+    radial-gradient(
+      900px 900px at var(--gx, 50%) var(--gy, 50%),
+      rgba(255,120,30,0.35),
+      transparent 75%
+    );
+
+  filter: blur(110px) saturate(1.8) contrast(1.2);
+  opacity: 1;
+  mix-blend-mode: screen;
+}
+
+/* noise */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* layout */
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.panel {
+  width: 100%;
+  max-width: 760px;
+
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.18);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.05);
+
+  padding: 26px;
+  animation: boot .9s ease-out;
+}
+
+@keyframes boot {
+  from { opacity: 0; transform: scale(.97) translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Audiowide", Sans-Serif ;
+  margin-bottom: 16px;
+}
+
+.dots span {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.dots span:nth-child(1){background:#ff5f56}
+.dots span:nth-child(2){background:#ffbd2e}
+.dots span:nth-child(3){background:#27c93f}
+
+.badge {
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e80;
+}
+
+/* hero */
+h1 {
+  font-size: clamp(36px, 8vw, 60px);
+  margin-bottom: 8px;
+}
+.cursor {
+  animation: blink 1s infinite;
+}
+@keyframes blink {50%{opacity:0}}
+
+.desc {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+/* terminal stats */
+.terminal {
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.line span:last-child {
+  color: var(--accent);
+}
+
+/* CTA */
+button {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff7a18, #ff4500);
+  color: #000;
+  box-shadow: 0 0 35px #ff7a1850;
+  transition: .25s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 55px #ff7a1880;
+}
+
+button.loading {
+  pointer-events: none;
+  opacity: .85;
+}
+
+/* footer */
+.footer {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* responsive */
+@media (max-width: 520px) {
+  .panel {
+    padding: 20px;
+  }
+  .terminal {
+    font-size: 13px;
+  }
+}
+/* online users */
+.users {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.status {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.status.online { background: #22c55e; }
+.status.idle   { background: #f59e0b; }
+.status.dnd    { background: #ef4444; }
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin {
+  font-size: 10px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.bot {
+  font-size: 10px;
+  color: #60a5fa;
+  border: 1px solid #60a5fa;
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+/* ===== macOS close animation ===== */
+
+.panel {
+  transform-origin: top center;
+  transition:
+    transform .45s cubic-bezier(.2,.9,.2,1),
+    opacity .35s ease,
+    filter .35s ease;
+}
+
+.panel.closed {
+  transform: scale(0.85) translateY(40px);
+  opacity: 0;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+/* ===== floating app icon ===== */
+
+.app-icon {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(20,25,34,.6);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.45),
+    0 0 25px rgba(255,122,24,.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transform: scale(.6);
+  pointer-events: none;
+
+  transition:
+    opacity .35s ease,
+    transform .35s cubic-bezier(.2,.9,.2,1),
+    box-shadow .25s ease;
+  z-index: 50;
+}
+
+.app-icon img {
+  width: 70%;
+  height: 70%;
+  border-radius: 10px;
+}
+
+.app-icon.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.app-icon:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.6),
+    0 0 35px rgba(255,122,24,.6);
+}
+.panel.minimized {
+  transform: scale(0.7) translateY(120px);
+  opacity: 0;
+  filter: blur(10px);
+  pointer-events: none;
+}
+.panel.expanded {
+  max-width: 92vw;
+  min-height: 85vh;
+  transform: scale(1.02);
+}
+i {
+    line-height: 1;
+}
+</style>
+</head>
+
+<body>
+    <div class="app-icon" id="appIcon" title="Byte Forge">
+  <img src="assets/logo.png" alt="Byte Forge">
+</div>
+<div class="glow"></div>
+
+<div class="wrapper">
+  <div class="panel">
+
+    <div class="header">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="badge"><i></i> LIVE • DISCORD</div>
+    </div>
+
+    <h1 id="header">
+  <span id="headerText">Byte Forge</span>
+  <span class="cursor"><i class="ph ph-line-vertical"></i></span>
+</h1>
+    <p class="desc">
+      Developers. Builders. Signal over noise.<br>
+      This is the public gateway to our Discord.
+    </p>
+
+    <div class="terminal">
+      <div class="line"><span>ONLINE_USERS</span><span id="online">--</span></div>
+      <div class="line"><span>CHANNELS</span><span id="channels">--</span></div>
+      <div class="line"><span>STATUS</span><span id="status">CONNECTING</span></div>
+      <div class="users" id="users">
+  <div style="color:var(--muted); margin-bottom:6px;">
+    &gt; online.users
+  </div>
+</div>
+    </div>
+
+    <button id="join">CONNECT TO DISCORD</button>
+
+    <div class="footer">
+      Flint Community • terminal-first • built by YOCRRZ
+    </div>
+
+  </div>
+</div>
+<audio id="uiGreenSound" preload="auto">
+  <source src="assets/bgm.mp3" type="audio/mpeg">
+</audio>
+<script>
+    /* ========= config ========= */
+const SERVER_ID = "1455242896335704077";
+const ADMIN_USER_ID = "1133013043488505866";
+const MAX_USERS = 8;
+const POLL_INTERVAL = 5000; // 5 seconds
+
+/* ========= elements ========= */
+const joinBtn = document.getElementById("join");
+const usersBox = document.getElementById("users");
+const onlineEl = document.getElementById("online");
+const channelsEl = document.getElementById("channels");
+const statusEl = document.getElementById("status");
+const terminal = document.querySelector(".terminal");
+const headerText = document.getElementById("headerText");
+
+/* ========= state ========= */
+let lastMembersMap = new Map();
+let messageQueue = [];
+let typing = false;
+const defaultHeader = "Byte Forge";
+
+/* ========= typewriter functions ========= */
+async function typeMessage(msg, el = headerText, speed = 60) {
+  typing = true;
+  el.textContent = "";
+  for (let i = 0; i < msg.length; i++) {
+    el.textContent += msg[i];
+    await new Promise(r => setTimeout(r, speed));
+  }
+}
+
+async function deleteMessage(el = headerText, speed = 40) {
+  while (el.textContent.length > 0) {
+    el.textContent = el.textContent.slice(0, -1);
+    await new Promise(r => setTimeout(r, speed));
+  }
+}
+
+async function showTempHeader(msg) {
+  if (typing) return;
+  await typeMessage(msg);
+  await new Promise(r => setTimeout(r, 1000));
+  await deleteMessage();
+  await typeMessage(defaultHeader);
+  typing = false;
+}
+
+/* ========= user panel functions ========= */
+function createUserElement(member) {
+  const user = document.createElement("div");
+  user.className = "user";
+  user.dataset.id = member.id;
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  const img = document.createElement("img");
+  img.src = member.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+
+  const status = document.createElement("span");
+  status.className = `status ${member.status}`;
+
+  avatar.appendChild(img);
+  avatar.appendChild(status);
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = member.username;
+
+  // badges
+  if (member.id === ADMIN_USER_ID) {
+  const badge = document.createElement("span");
+  badge.className = "admin";
+  badge.textContent = "ADMIN";
+  name.appendChild(badge);
+}
+
+ if (member.bot) {
+  const badge = document.createElement("span");
+  badge.className = "bot";
+  badge.textContent = "BOT";
+  name.appendChild(badge);
+}
+
+  user.appendChild(avatar);
+  user.appendChild(name);
+
+  // micro entrance animation
+  user.style.opacity = 0;
+  user.style.transform = "scale(0.95) translateY(5px)";
+  setTimeout(() => {
+    user.style.transition = "all 0.35s ease-out";
+    user.style.opacity = 1;
+    user.style.transform = "scale(1) translateY(0)";
+  }, 50);
+
+  return user;
+}
+
+function addOrUpdateUser(member) {
+  const existing = usersBox.querySelector(`.user[data-id="${member.id}"]`);
+  if (existing) {
+    const statusEl = existing.querySelector(".status");
+    statusEl.className = `status ${member.status}`;
+    return existing;
+  } else {
+    const el = createUserElement(member);
+    usersBox.appendChild(el);
+    return el;
+  }
+}
+
+function removeUser(memberId) {
+  const el = usersBox.querySelector(`.user[data-id="${memberId}"]`);
+  if (el) {
+    el.style.transition = "all 0.35s ease-in";
+    el.style.opacity = 0;
+    el.style.transform = "scale(0.95) translateY(5px)";
+    setTimeout(() => el.remove(), 350);
+  }
+}
+
+/* ========= terminal typewriter log ========= */
+function enqueueMessage(msg) {
+  messageQueue.push(msg);
+  if (!typing) typeMessages();
+}
+
+async function typeMessages() {
+  typing = true;
+  while (messageQueue.length) {
+    const msg = messageQueue.shift();
+    const line = document.createElement("div");
+    terminal.appendChild(line);
+
+    // typewriter effect
+    for (let i = 0; i <= msg.length; i++) {
+      line.textContent = msg.slice(0, i);
+      await new Promise(r => setTimeout(r, 30));
+    }
+
+    await new Promise(r => setTimeout(r, 1200));
+
+    // delete effect
+    for (let i = msg.length; i >= 0; i--) {
+      line.textContent = msg.slice(0, i);
+      await new Promise(r => setTimeout(r, 20));
+    }
+
+    line.remove();
+  }
+  typing = false;
+}
+
+/* ========= fetch members + diff logic ========= */
+async function fetchMembers() {
+  try {
+    const res = await fetch(`https://discord.com/api/guilds/${SERVER_ID}/widget.json`);
+    if (!res.ok) throw new Error("Widget offline");
+    const data = await res.json();
+
+    onlineEl.textContent = data.presence_count ?? "--";
+    channelsEl.textContent = data.channels?.length ?? "--";
+    statusEl.textContent = "ONLINE";
+
+    const currentMap = new Map();
+    data.members.forEach(m => currentMap.set(m.id, m));
+
+    // detect joins & updates
+    currentMap.forEach((member, id) => {
+      if (!lastMembersMap.has(id)) {
+        showTempHeader(`> ${member.username} joined`);
+        enqueueMessage(`${member.username} joined the server`);
+        addOrUpdateUser(member);
+      } else {
+        addOrUpdateUser(member); // update status
+      }
+    });
+
+    // detect leaves
+    lastMembersMap.forEach((member, id) => {
+      if (!currentMap.has(id)) {
+        showTempHeader(`> ${member.username} left`);
+        enqueueMessage(`${member.username} left the server`);
+        removeUser(id);
+      }
+    });
+
+    // separate humans & bots
+    const humans = Array.from(currentMap.values()).filter(m => !m.bot);
+    const bots = Array.from(currentMap.values()).filter(m => m.bot);
+
+    // enforce max users
+    const humanIds = humans.map(m => m.id);
+    const botIds = bots.map(m => m.id);
+    usersBox.querySelectorAll(".user").forEach(u => {
+      if (!humanIds.includes(u.dataset.id) && !botIds.includes(u.dataset.id)) {
+        removeUser(u.dataset.id);
+      }
+    });
+
+    lastMembersMap = currentMap;
+
+  } catch (err) {
+    statusEl.textContent = "OFFLINE";
+    statusEl.style.color = "#ef4444";
+    onlineEl.textContent = "--";
+    channelsEl.textContent = "--";
+  }
+}
+
+/* ========= init ========= */
+fetchMembers();
+setInterval(fetchMembers, POLL_INTERVAL);
+
+/* ========= join button ========= */
+joinBtn.onclick = () => {
+  joinBtn.classList.add("loading");
+  joinBtn.textContent = "OPENING DISCORD…";
+  setTimeout(() => {
+    fetch(`https://discord.com/api/guilds/${SERVER_ID}/widget.json`)
+      .then(r => r.json())
+      .then(d => window.location.href = d.instant_invite);
+  }, 700);
+};
+</script>
+<script>
+/* ========= controlled cinematic glow ========= */
+const glow = document.querySelector(".glow");
+
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+/*
+ Keep glow INSIDE visible zone:
+ 20% → 80% guarantees radial never exits viewport
+*/
+function safePos() {
+  return {
+    x: rand(20, 80),
+    y: rand(20, 80)
+  };
+}
+
+function zooshGlow() {
+  const start = safePos();
+  const end   = safePos();
+
+  // instant jump (hidden)
+  glow.style.transition = "none";
+  glow.style.opacity = "0";
+
+  document.documentElement.style.setProperty("--gx", start.x + "%");
+  document.documentElement.style.setProperty("--gy", start.y + "%");
+
+  requestAnimationFrame(() => {
+    glow.style.transition =
+      "opacity .5s ease, transform 1.6s cubic-bezier(.2,.8,.2,1)";
+    glow.style.opacity = "1";
+
+    document.documentElement.style.setProperty("--gx", end.x + "%");
+    document.documentElement.style.setProperty("--gy", end.y + "%");
+  });
+
+  // fade out slightly, not fully dead
+  setTimeout(() => {
+    glow.style.opacity = "0.6";
+  }, 1500);
+
+  // pause → repeat
+  setTimeout(zooshGlow, rand(2600, 4200));
+}
+
+// start after boot
+setTimeout(zooshGlow, 900);
+
+/* ========= UI audio ========= */
+const greenSound = document.getElementById("uiGreenSound");
+
+function playGreenSound() {
+  if (!greenSound) return;
+  greenSound.currentTime = 0; // rewind
+  greenSound.volume = 0.9;    // subtle, not annoying
+  greenSound.play().catch(() => {});
+}
+</script>
+<script>
+const panel = document.querySelector(".panel");
+
+const redBtn    = document.querySelector(".dots span:nth-child(1)");
+const yellowBtn = document.querySelector(".dots span:nth-child(2)");
+const greenBtn  = document.querySelector(".dots span:nth-child(3)");
+const appIcon   = document.getElementById("appIcon");
+
+/* 🔴 CLOSE */
+redBtn.onclick = () => {
+  panel.classList.add("closed");
+  setTimeout(() => appIcon.classList.add("visible"), 250);
+};
+
+/* 🟡 MINIMIZE */
+yellowBtn.onclick = () => {
+  panel.classList.add("minimized");
+  appIcon.classList.add("visible");
+};
+
+/* 🟢 EXPAND */
+greenBtn.onclick = () => {
+  panel.classList.toggle("expanded");
+};
+
+/* APP ICON RESTORE */
+appIcon.onclick = () => {
+  playGreenSound();
+  appIcon.classList.remove("visible");
+  panel.classList.remove("closed", "minimized");
+};
+</script>
+</body>
+</html>
